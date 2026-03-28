@@ -11,7 +11,8 @@ const DB_FILE = 'database.json';
 // 默认数据结构
 const defaultData = {
   users: [],
-  passwordResetTokens: [] // 存储密码重置令牌
+  passwordResetTokens: [], // 存储密码重置令牌
+  emailVerificationTokens: [] // 存储邮箱验证令牌
 };
 
 // 初始化数据库
@@ -53,7 +54,7 @@ async function findUserByUsername(username) {
 }
 
 // 创建新用户
-async function createUser(username, email, password) {
+async function createUser(username, email, password, isEmailVerified = false) {
   const hashedPassword = await bcrypt.hash(password, 10);
   
   const newUser = {
@@ -61,6 +62,8 @@ async function createUser(username, email, password) {
     username,
     email: email.toLowerCase(),
     password: hashedPassword,
+    isEmailVerified,
+    avatar: null,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };
@@ -136,6 +139,72 @@ async function deletePasswordResetToken(token) {
   await db.write();
 }
 
+// ==================== 邮箱验证令牌操作 ====================
+
+// 创建邮箱验证令牌
+async function createEmailVerificationToken(userId) {
+  // 删除该用户之前的令牌
+  db.data.emailVerificationTokens = db.data.emailVerificationTokens.filter(
+    token => token.userId !== userId
+  );
+  
+  // 创建新令牌（24小时有效）
+  const verificationToken = {
+    token: uuidv4(),
+    userId: userId,
+    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24小时后过期
+  };
+  
+  db.data.emailVerificationTokens.push(verificationToken);
+  await db.write();
+  
+  return verificationToken.token;
+}
+
+// 验证邮箱验证令牌
+async function verifyEmailVerificationToken(token) {
+  const verificationToken = db.data.emailVerificationTokens.find(t => t.token === token);
+  if (!verificationToken) return null;
+  
+  // 检查是否过期
+  if (new Date(verificationToken.expiresAt) < new Date()) {
+    // 删除过期令牌
+    db.data.emailVerificationTokens = db.data.emailVerificationTokens.filter(t => t.token !== token);
+    await db.write();
+    return null;
+  }
+  
+  return verificationToken;
+}
+
+// 删除邮箱验证令牌
+async function deleteEmailVerificationToken(token) {
+  db.data.emailVerificationTokens = db.data.emailVerificationTokens.filter(t => t.token !== token);
+  await db.write();
+}
+
+// 标记用户邮箱为已验证
+async function markEmailAsVerified(userId) {
+  const user = await findUserById(userId);
+  if (!user) return null;
+  
+  user.isEmailVerified = true;
+  user.updatedAt = new Date().toISOString();
+  await db.write();
+  return true;
+}
+
+// 更新用户头像
+async function updateUserAvatar(userId, avatarUrl) {
+  const user = await findUserById(userId);
+  if (!user) return null;
+  
+  user.avatar = avatarUrl;
+  user.updatedAt = new Date().toISOString();
+  await db.write();
+  return user;
+}
+
 module.exports = {
   initDb,
   getDb,
@@ -147,5 +216,10 @@ module.exports = {
   updatePassword,
   createPasswordResetToken,
   verifyPasswordResetToken,
-  deletePasswordResetToken
+  deletePasswordResetToken,
+  createEmailVerificationToken,
+  verifyEmailVerificationToken,
+  deleteEmailVerificationToken,
+  markEmailAsVerified,
+  updateUserAvatar
 };

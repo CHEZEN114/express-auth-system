@@ -9,7 +9,9 @@ function requireAuth(req, res, next) {
   }
   
   // 保存用户尝试访问的URL，登录后跳转回来
-  req.session.returnTo = req.originalUrl;
+  if (req.session) {
+    req.session.returnTo = req.originalUrl;
+  }
   req.flash('error', '请先登录');
   res.redirect('/login');
 }

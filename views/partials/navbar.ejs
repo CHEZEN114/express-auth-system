@@ -1,19 +1,33 @@
 <nav class="navbar">
   <div class="container">
-    <a href="/" class="navbar-brand">🔐 用户系统</a>
+    <a href="/" class="navbar-brand">🔐 <%= __('app.name') %></a>
     <ul class="navbar-nav">
-      <li><a href="/">首页</a></li>
+      <li><a href="/"><%= __('nav.home') %></a></li>
       <% if (user) { %>
-        <li><a href="/dashboard">用户中心</a></li>
-        <li><a href="/profile">个人资料</a></li>
+        <li><a href="/dashboard"><%= __('nav.dashboard') %></a></li>
+        <li><a href="/profile"><%= __('nav.profile') %></a></li>
         <li class="user-info">
+          <% if (user.avatar) { %>
+            <img src="<%= user.avatar %>" alt="头像" class="user-avatar">
+          <% } else { %>
+            <div class="user-avatar" style="display: flex; align-items: center; justify-content: center; font-size: 1rem;">
+              <%= user.username.charAt(0).toUpperCase() %>
+            </div>
+          <% } %>
           <span>👋 <%= user.username %></span>
-          <a href="/logout" class="btn btn-danger" style="padding: 0.5rem 1rem; font-size: 0.875rem;">登出</a>
+          <a href="/logout" class="btn btn-danger" style="padding: 0.5rem 1rem; font-size: 0.875rem;"><%= __('nav.logout') %></a>
         </li>
       <% } else { %>
-        <li><a href="/login">登录</a></li>
-        <li><a href="/register" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">注册</a></li>
+        <li><a href="/login"><%= __('nav.login') %></a></li>
+        <li><a href="/register" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem;"><%= __('nav.register') %></a></li>
       <% } %>
+      <li style="margin-left: 1rem; border-left: 1px solid #ddd; padding-left: 1rem;">
+        <% if (locale === 'zh') { %>
+          <a href="/lang/en" title="Switch to English">🇺🇸 EN</a>
+        <% } else { %>
+          <a href="/lang/zh" title="切换到中文">🇨🇳 中文</a>
+        <% } %>
+      </li>
     </ul>
   </div>
 </nav>

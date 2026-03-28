@@ -27,6 +27,48 @@
       margin: 0 auto 1rem;
     }
     
+    .profile-avatar-img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid white;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      margin: 0 auto 1rem;
+      display: block;
+    }
+    
+    .avatar-upload {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .avatar-upload-label {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      background-color: #667eea;
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      border: 3px solid white;
+      transition: background-color 0.2s;
+      font-size: 14px;
+    }
+    
+    .avatar-upload-label:hover {
+      background-color: #5a6fd6;
+    }
+    
+    .avatar-upload input[type="file"] {
+      display: none;
+    }
+    
     .info-group {
       background: #f8f9fa;
       padding: 1rem;
@@ -45,6 +87,28 @@
       font-weight: 500;
       color: #333;
     }
+    
+    .edit-form {
+      display: none;
+    }
+    
+    .edit-form.active {
+      display: block;
+    }
+    
+    .profile-view.hidden {
+      display: none;
+    }
+    
+    .verified-badge {
+      color: #28a745;
+      font-size: 0.875rem;
+    }
+    
+    .unverified-badge {
+      color: #dc3545;
+      font-size: 0.875rem;
+    }
   </style>
 </head>
 <body>
@@ -56,36 +120,100 @@
         <%- include('partials/messages') %>
         
         <div class="card">
-          <div class="profile-header">
-            <div class="profile-avatar">
-              <%= user.username.charAt(0).toUpperCase() %>
+          <!-- 查看模式 -->
+          <div id="profileView" class="profile-view">
+            <div class="profile-header">
+              <% if (user.avatar) { %>
+                <img src="<%= user.avatar %>" alt="头像" class="profile-avatar-img">
+              <% } else { %>
+                <div class="profile-avatar">
+                  <%= user.username.charAt(0).toUpperCase() %>
+                </div>
+              <% } %>
+              <h1><%= user.username %></h1>
+              <p style="color: #666;">
+                个人资料 
+                <% if (user.isEmailVerified) { %>
+                  <span class="verified-badge">✓ 邮箱已验证</span>
+                <% } else { %>
+                  <span class="unverified-badge">✗ 邮箱未验证</span>
+                <% } %>
+              </p>
             </div>
-            <h1><%= user.username %></h1>
-            <p style="color: #666;">个人资料</p>
+            
+            <div class="info-group">
+              <div class="info-label">👤 用户名</div>
+              <div class="info-value"><%= user.username %></div>
+            </div>
+            
+            <div class="info-group">
+              <div class="info-label">📧 邮箱地址</div>
+              <div class="info-value"><%= user.email %></div>
+            </div>
+            
+            <div class="info-group">
+              <div class="info-label">📅 注册时间</div>
+              <div class="info-value"><%= new Date(user.createdAt).toLocaleString('zh-CN') %></div>
+            </div>
+            
+            <div class="info-group">
+              <div class="info-label">🔄 最后更新</div>
+              <div class="info-value"><%= new Date(user.updatedAt).toLocaleString('zh-CN') %></div>
+            </div>
+            
+            <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center;">
+              <button type="button" class="btn btn-primary" onclick="toggleEdit()">编辑资料</button>
+              <a href="/dashboard" class="btn btn-secondary">返回用户中心</a>
+            </div>
           </div>
           
-          <div class="info-group">
-            <div class="info-label">👤 用户名</div>
-            <div class="info-value"><%= user.username %></div>
-          </div>
-          
-          <div class="info-group">
-            <div class="info-label">📧 邮箱地址</div>
-            <div class="info-value"><%= user.email %></div>
-          </div>
-          
-          <div class="info-group">
-            <div class="info-label">📅 注册时间</div>
-            <div class="info-value"><%= new Date(user.createdAt).toLocaleString('zh-CN') %></div>
-          </div>
-          
-          <div class="info-group">
-            <div class="info-label">🔄 最后更新</div>
-            <div class="info-value"><%= new Date(user.updatedAt).toLocaleString('zh-CN') %></div>
-          </div>
-          
-          <div style="margin-top: 2rem; text-align: center;">
-            <a href="/dashboard" class="btn btn-secondary">返回用户中心</a>
+          <!-- 编辑模式 -->
+          <div id="editForm" class="edit-form">
+            <div class="profile-header">
+              <div class="avatar-upload">
+                <% if (user.avatar) { %>
+                  <img src="<%= user.avatar %>" alt="头像" class="profile-avatar-img" id="avatarPreview">
+                <% } else { %>
+                  <div class="profile-avatar" id="avatarPreviewDiv">
+                    <%= user.username.charAt(0).toUpperCase() %>
+                  </div>
+                  <img src="" alt="头像" class="profile-avatar-img" id="avatarPreview" style="display: none;">
+                <% } %>
+                <label for="avatarInput" class="avatar-upload-label" title="更换头像">📷</label>
+              </div>
+              <h2>编辑个人资料</h2>
+            </div>
+            
+            <!-- 头像上传表单 -->
+            <form action="/profile/avatar" method="POST" enctype="multipart/form-data" id="avatarForm">
+              <input type="file" id="avatarInput" name="avatar" accept="image/*" onchange="previewAvatar(this)">
+            </form>
+            
+            <!-- 资料更新表单 -->
+            <form action="/profile" method="POST">
+              <div class="form-group">
+                <label class="form-label" for="username">👤 用户名</label>
+                <input 
+                  type="text" 
+                  id="username" 
+                  name="username" 
+                  class="form-control" 
+                  value="<%= user.username %>"
+                  minlength="3"
+                  required
+                >
+              </div>
+              
+              <div class="info-group">
+                <div class="info-label">📧 邮箱地址（不可更改）</div>
+                <div class="info-value"><%= user.email %></div>
+              </div>
+              
+              <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center;">
+                <button type="submit" class="btn btn-primary">保存修改</button>
+                <button type="button" class="btn btn-secondary" onclick="toggleEdit()">取消</button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
@@ -93,5 +221,36 @@
   </main>
   
   <%- include('partials/footer') %>
+  
+  <script>
+    function toggleEdit() {
+      const view = document.getElementById('profileView');
+      const form = document.getElementById('editForm');
+      view.classList.toggle('hidden');
+      form.classList.toggle('active');
+    }
+    
+    function previewAvatar(input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const preview = document.getElementById('avatarPreview');
+          const previewDiv = document.getElementById('avatarPreviewDiv');
+          
+          if (preview) {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+          }
+          if (previewDiv) {
+            previewDiv.style.display = 'none';
+          }
+          
+          // 自动提交头像表单
+          document.getElementById('avatarForm').submit();
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+  </script>
 </body>
 </html>

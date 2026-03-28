@@ -7,13 +7,18 @@ const nodemailer = require('nodemailer');
 
 const {
   findUserByEmail,
+  findUserById,
   findUserByUsername,
   createUser,
   verifyPassword,
   updatePassword,
   createPasswordResetToken,
   verifyPasswordResetToken,
-  deletePasswordResetToken
+  deletePasswordResetToken,
+  createEmailVerificationToken,
+  verifyEmailVerificationToken,
+  deleteEmailVerificationToken,
+  markEmailAsVerified
 } = require('../db');
 
 const { requireGuest, requireAuth } = require('../middleware/auth');
@@ -74,14 +79,32 @@ router.post('/register', requireGuest, async (req, res) => {
       return res.redirect('/register');
     }
     
-    // 创建用户
-    const user = await createUser(username, email, password);
+    // 创建用户（邮箱未验证）
+    const user = await createUser(username, email, password, false);
+    
+    // 创建邮箱验证令牌
+    const verificationToken = await createEmailVerificationToken(user.id);
+    
+    // 构建验证链接
+    const verifyUrl = `${req.protocol}://${req.get('host')}/verify-email/${verificationToken}`;
+    
+    // 发送验证邮件（开发环境输出到控制台）
+    console.log('\n========== 邮箱验证邮件 ==========');
+    console.log('收件人:', email);
+    console.log('主题: 请验证您的邮箱地址');
+    console.log('内容:');
+    console.log(`您好 ${username}，`);
+    console.log('感谢您注册！请验证您的邮箱地址以激活账户。');
+    console.log('请点击以下链接验证邮箱（24小时内有效）：');
+    console.log(verifyUrl);
+    console.log('================================\n');
     
     // 自动登录
     req.session.user = user;
     
-    req.flash('success', '注册成功！欢迎加入！');
-    res.redirect('/dashboard');
+    req.flash('success', '注册成功！请验证您的邮箱地址（查看控制台输出）');
+    req.flash('info', `验证链接（开发模式）：${verifyUrl}`);
+    res.redirect('/verify-email');
     
   } catch (error) {
     console.error('注册错误:', error);
@@ -120,6 +143,23 @@ router.post('/login', requireGuest, async (req, res) => {
     if (!isValid) {
       req.flash('error', '邮箱或密码错误');
       return res.redirect('/login');
+    }
+    
+    // 检查邮箱是否已验证
+    if (!user.isEmailVerified) {
+      // 创建新的验证令牌
+      const verificationToken = await createEmailVerificationToken(user.id);
+      const verifyUrl = `${req.protocol}://${req.get('host')}/verify-email/${verificationToken}`;
+      
+      console.log('\n========== 邮箱验证提醒 ==========');
+      console.log('收件人:', user.email);
+      console.log('主题: 请验证您的邮箱地址');
+      console.log('验证链接:', verifyUrl);
+      console.log('================================\n');
+      
+      req.flash('error', '请先验证您的邮箱地址后再登录');
+      req.flash('info', `验证链接（开发模式）：${verifyUrl}`);
+      return res.redirect('/verify-email');
     }
     
     // 设置 session
@@ -285,6 +325,102 @@ router.post('/reset-password', requireGuest, async (req, res) => {
     req.flash('error', '重置密码时发生错误，请稍后重试');
     res.redirect('/forgot-password');
   }
+});
+
+// ==================== 邮箱验证 ====================
+
+// 邮箱验证提示页面
+router.get('/verify-email', requireGuest, (req, res) => {
+  res.render('auth/verify-email', { 
+    title: '验证邮箱',
+    email: req.query.email || ''
+  });
+});
+
+// 处理邮箱验证
+router.get('/verify-email/:token', async (req, res) => {
+  try {
+    const { token } = req.params;
+    
+    // 验证令牌
+    const verificationToken = await verifyEmailVerificationToken(token);
+    if (!verificationToken) {
+      req.flash('error', '验证链接已过期或无效');
+      return res.redirect('/verify-email');
+    }
+    
+    // 标记邮箱为已验证
+    await markEmailAsVerified(verificationToken.userId);
+    
+    // 删除已使用的令牌
+    await deleteEmailVerificationToken(token);
+    
+    req.flash('success', '邮箱验证成功！您现在可以登录了');
+    res.redirect('/login');
+    
+  } catch (error) {
+    console.error('邮箱验证错误:', error);
+    req.flash('error', '验证过程中发生错误，请稍后重试');
+    res.redirect('/verify-email');
+  }
+});
+
+// 重新发送验证邮件
+router.post('/resend-verification', requireGuest, async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      req.flash('error', '请输入邮箱地址');
+      return res.redirect('/verify-email');
+    }
+    
+    // 查找用户
+    const user = await findUserByEmail(email);
+    if (!user) {
+      // 为了安全，即使用户不存在也显示相同消息
+      req.flash('success', '如果该邮箱已注册且未验证，我们将发送验证邮件');
+      return res.redirect('/verify-email');
+    }
+    
+    // 检查邮箱是否已验证
+    if (user.isEmailVerified) {
+      req.flash('info', '该邮箱已经验证过了，请直接登录');
+      return res.redirect('/login');
+    }
+    
+    // 创建新的验证令牌
+    const verificationToken = await createEmailVerificationToken(user.id);
+    const verifyUrl = `${req.protocol}://${req.get('host')}/verify-email/${verificationToken}`;
+    
+    // 发送验证邮件（开发环境输出到控制台）
+    console.log('\n========== 重新发送邮箱验证邮件 ==========');
+    console.log('收件人:', email);
+    console.log('主题: 请验证您的邮箱地址');
+    console.log('验证链接:', verifyUrl);
+    console.log('================================\n');
+    
+    req.flash('success', '验证邮件已重新发送（请查看控制台输出）');
+    req.flash('info', `验证链接（开发模式）：${verifyUrl}`);
+    res.redirect('/verify-email');
+    
+  } catch (error) {
+    console.error('重新发送验证邮件错误:', error);
+    req.flash('error', '处理请求时发生错误，请稍后重试');
+    res.redirect('/verify-email');
+  }
+});
+
+// ==================== 语言切换 ====================
+
+// 切换语言
+router.get('/lang/:lang', (req, res) => {
+  const lang = req.params.lang;
+  if (['zh', 'en'].includes(lang)) {
+    res.cookie('lang', lang, { maxAge: 365 * 24 * 60 * 60 * 1000 }); // 1年
+    req.setLocale(lang);
+  }
+  res.redirect(req.get('Referer') || '/');
 });
 
 module.exports = router;

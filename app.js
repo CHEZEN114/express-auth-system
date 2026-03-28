@@ -1,16 +1,22 @@
 /**
  * Express 用户认证系统
- * 功能：注册、登录、登出、密码重置
+ * 功能：注册、登录、登出、密码重置、邮箱验证、OAuth 登录
  */
+require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
 const flash = require('connect-flash');
+const cookieParser = require('cookie-parser');
 const path = require('path');
+const passport = require('./config/passport');
 
 // 导入数据库和路由
 const { initDb } = require('./db');
 const authRoutes = require('./routes/auth');
+const oauthRoutes = require('./routes/oauth');
+const userRoutes = require('./routes/user');
 const { requireAuth, requireGuest } = require('./middleware/auth');
+const i18n = require('./config/i18n');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -39,11 +45,24 @@ app.use(session({
 // Flash 消息
 app.use(flash());
 
+// Cookie 解析器（必须在 i18n 之前）
+app.use(cookieParser());
+
+// i18n 国际化
+app.use(i18n.init);
+
+// Passport 初始化
+app.use(passport.initialize());
+app.use(passport.session());
+
 // 设置全局模板变量
 app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
   res.locals.success_msg = req.flash('success');
   res.locals.error_msg = req.flash('error');
+  res.locals.info = req.flash('info');
+  res.locals.__ = res.__;
+  res.locals.locale = req.getLocale();
   next();
 });
 
@@ -55,6 +74,8 @@ app.set('views', path.join(__dirname, 'views'));
 
 // 认证路由
 app.use('/', authRoutes);
+app.use('/auth', oauthRoutes);
+app.use('/', userRoutes);
 
 // 首页
 app.get('/', (req, res) => {
@@ -69,13 +90,7 @@ app.get('/dashboard', requireAuth, (req, res) => {
   });
 });
 
-// 个人资料页面
-app.get('/profile', requireAuth, (req, res) => {
-  res.render('profile', {
-    title: '个人资料',
-    user: req.session.user
-  });
-});
+
 
 // 404 页面
 app.use((req, res) => {
@@ -114,6 +129,7 @@ async function startServer() {
       console.log('  POST /reset-password       - 提交新密码');
       console.log('  GET  /dashboard  - 用户中心（需登录）');
       console.log('  GET  /profile    - 个人资料（需登录）');
+      console.log('  GET  /lang/:lang - 切换语言');
     });
   } catch (error) {
     console.error('启动失败:', error);
@@ -121,4 +137,10 @@ async function startServer() {
   }
 }
 
-startServer();
+// 导出 app 供测试使用
+module.exports = app;
+
+// 如果不是测试环境，启动服务器
+if (process.env.NODE_ENV !== 'test') {
+  startServer();
+}

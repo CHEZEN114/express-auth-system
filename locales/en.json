@@ -1,0 +1,138 @@
+{
+  "app": {
+    "name": "User System",
+    "description": "Secure user authentication system"
+  },
+  "nav": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout"
+  },
+  "home": {
+    "title": "Welcome to User System",
+    "subtitle": "Simple, secure, and reliable user authentication solution",
+    "features": {
+      "secure": {
+        "title": "🔐 Secure",
+        "desc": "Uses bcrypt encryption to protect your password"
+      },
+      "easy": {
+        "title": "⚡ Easy to Use",
+        "desc": "Clean interface design, smooth user experience"
+      },
+      "oauth": {
+        "title": "🌐 Social Login",
+        "desc": "Support Google, GitHub and other third-party logins"
+      }
+    },
+    "getStarted": "Get Started",
+    "learnMore": "Learn More"
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Sign in to your account",
+      "email": "Email Address",
+      "password": "Password",
+      "remember": "Remember me (7 days)",
+      "submit": "Sign In",
+      "forgot": "Forgot password?",
+      "noAccount": "Don't have an account?",
+      "registerNow": "Register now"
+    },
+    "register": {
+      "title": "Create Account",
+      "subtitle": "Start your journey",
+      "username": "Username",
+      "email": "Email Address",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "submit": "Register",
+      "hasAccount": "Already have an account?",
+      "loginNow": "Sign in now"
+    },
+    "verifyEmail": {
+      "title": "Verify Your Email",
+      "message": "We've sent a verification link to your email. Please check your inbox and click the link to complete verification.",
+      "expiry": "The verification link is valid for 24 hours.",
+      "resend": "Resend Verification Email",
+      "noReceive": "Didn't receive the email?"
+    },
+    "forgotPassword": {
+      "title": "Forgot Password",
+      "message": "Enter your email address and we'll send you a password reset link.",
+      "submit": "Send Reset Link",
+      "backToLogin": "Back to Login"
+    },
+    "resetPassword": {
+      "title": "Reset Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "submit": "Reset Password"
+    },
+    "oauth": {
+      "google": "Continue with Google",
+      "github": "Continue with GitHub",
+      "divider": "Or continue with"
+    }
+  },
+  "profile": {
+    "title": "Profile",
+    "edit": "Edit Profile",
+    "save": "Save Changes",
+    "cancel": "Cancel",
+    "username": "Username",
+    "email": "Email Address",
+    "createdAt": "Joined",
+    "updatedAt": "Last Updated",
+    "verified": "✓ Email verified",
+    "unverified": "✗ Email not verified",
+    "changeAvatar": "Change Avatar",
+    "backToDashboard": "Back to Dashboard"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back",
+    "stats": {
+      "title": "Account Status",
+      "email": "Email",
+      "status": "Status",
+      "joined": "Joined"
+    },
+    "actions": {
+      "title": "Quick Actions",
+      "profile": "View Profile",
+      "settings": "Account Settings"
+    }
+  },
+  "messages": {
+    "loginSuccess": "Login successful! Welcome back!",
+    "registerSuccess": "Registration successful! Please verify your email address.",
+    "logoutSuccess": "You have been logged out successfully.",
+    "passwordResetSent": "Password reset link has been sent.",
+    "passwordResetSuccess": "Password reset successful. Please login with your new password.",
+    "emailVerified": "Email verified successfully! You can now login.",
+    "profileUpdated": "Profile updated successfully!",
+    "avatarUploaded": "Avatar uploaded successfully!",
+    "error": {
+      "general": "An error occurred. Please try again later.",
+      "invalidCredentials": "Invalid email or password.",
+      "emailExists": "This email is already registered.",
+      "usernameExists": "This username is already taken.",
+      "passwordMismatch": "Passwords do not match.",
+      "invalidToken": "Link has expired or is invalid.",
+      "emailNotVerified": "Please verify your email address before logging in."
+    }
+  },
+  "language": {
+    "zh": "中文",
+    "en": "English",
+    "switch": "Switch Language"
+  },
+  "footer": {
+    "copyright": "User Auth System - Built with Express + LowDB"
+  }
+}
