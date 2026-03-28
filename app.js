@@ -19,6 +19,7 @@ const userRoutes = require('./routes/user');
 const securityRoutes = require('./routes/security');
 const twoFaRoutes = require('./routes/twofa');
 const adminRoutes = require('./routes/admin');
+const apiRoutes = require('./routes/api');
 const { requireAuth, requireGuest } = require('./middleware/auth');
 const { checkUserActive } = require('./middleware/admin');
 const i18n = require('./config/i18n');
@@ -87,6 +88,9 @@ app.use('/', userRoutes);
 app.use('/', securityRoutes);
 app.use('/', twoFaRoutes);
 app.use('/', adminRoutes);
+
+// API 路由
+app.use('/api/v1', apiRoutes);
 
 // 首页
 app.get('/', (req, res) => {
