@@ -98,30 +98,38 @@ function validatePasswordPolicy(password) {
 // 记录登录日志
 async function recordLoginLog(userId, email, success, req) {
   try {
-    const db = getDb();
     const logEntry = {
-      id: require('uuid').v4(),
       userId,
       email,
       success,
       ip: req.ip || req.connection.remoteAddress,
       userAgent: req.headers['user-agent'],
-      timestamp: new Date().toISOString()
+      timestamp: new Date()
     };
     
-    // 初始化登录日志数组
-    if (!db.data.loginLogs) {
-      db.data.loginLogs = [];
+    // 如果使用 MongoDB，使用 LoginLog 模型
+    if (process.env.USE_MONGODB === 'true') {
+      const { LoginLog } = require('../models');
+      await LoginLog.create(logEntry);
+    } else {
+      // 使用 LowDB
+      const db = getDb();
+      logEntry.id = require('uuid').v4();
+      logEntry.timestamp = logEntry.timestamp.toISOString();
+      
+      if (!db.data.loginLogs) {
+        db.data.loginLogs = [];
+      }
+      
+      db.data.loginLogs.push(logEntry);
+      
+      // 只保留最近 1000 条记录
+      if (db.data.loginLogs.length > 1000) {
+        db.data.loginLogs = db.data.loginLogs.slice(-1000);
+      }
+      
+      await db.write();
     }
-    
-    db.data.loginLogs.push(logEntry);
-    
-    // 只保留最近 1000 条记录
-    if (db.data.loginLogs.length > 1000) {
-      db.data.loginLogs = db.data.loginLogs.slice(-1000);
-    }
-    
-    await db.write();
   } catch (error) {
     console.error('记录登录日志失败:', error);
   }
@@ -130,6 +138,16 @@ async function recordLoginLog(userId, email, success, req) {
 // 获取用户的登录日志
 async function getUserLoginLogs(userId, limit = 10) {
   try {
+    // 如果使用 MongoDB
+    if (process.env.USE_MONGODB === 'true') {
+      const { LoginLog } = require('../models');
+      return await LoginLog.find({ userId })
+        .sort({ timestamp: -1 })
+        .limit(limit)
+        .lean();
+    }
+    
+    // 使用 LowDB
     const db = getDb();
     if (!db.data.loginLogs) return [];
     

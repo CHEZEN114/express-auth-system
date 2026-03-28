@@ -12,6 +12,7 @@ const passport = require('./config/passport');
 
 // 导入数据库和路由
 const { initDb } = require('./db');
+const { connectDatabase } = require('./config/database');
 const authRoutes = require('./routes/auth');
 const oauthRoutes = require('./routes/oauth');
 const userRoutes = require('./routes/user');
