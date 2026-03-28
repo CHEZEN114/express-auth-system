@@ -80,11 +80,63 @@
                 name="password" 
                 class="form-control" 
                 placeholder="<%= __('auth.register.password') %>"
-                minlength="6"
+                minlength="8"
                 required
               >
-              <p class="password-hint">Password must be at least 6 characters</p>
+              <div class="password-policy">
+                <small class="text-muted">密码要求：</small>
+                <ul class="policy-list">
+                  <li id="length-check">❌ 至少 8 个字符</li>
+                  <li id="uppercase-check">❌ 包含大写字母</li>
+                  <li id="lowercase-check">❌ 包含小写字母</li>
+                  <li id="number-check">❌ 包含数字</li>
+                  <li id="special-check">❌ 包含特殊字符</li>
+                </ul>
+              </div>
             </div>
+            
+            <style>
+              .password-policy {
+                margin-top: 0.5rem;
+                padding: 0.75rem;
+                background: #f8f9fa;
+                border-radius: 8px;
+              }
+              .policy-list {
+                list-style: none;
+                margin: 0.25rem 0 0 0;
+                padding: 0;
+                font-size: 0.85rem;
+              }
+              .policy-list li {
+                margin: 0.25rem 0;
+                color: #dc3545;
+              }
+              .policy-list li.valid {
+                color: #28a745;
+              }
+            </style>
+            
+            <script>
+              document.getElementById('password').addEventListener('input', function(e) {
+                const password = e.target.value;
+                
+                document.getElementById('length-check').className = password.length >= 8 ? 'valid' : '';
+                document.getElementById('length-check').innerHTML = password.length >= 8 ? '✅ 至少 8 个字符' : '❌ 至少 8 个字符';
+                
+                document.getElementById('uppercase-check').className = /[A-Z]/.test(password) ? 'valid' : '';
+                document.getElementById('uppercase-check').innerHTML = /[A-Z]/.test(password) ? '✅ 包含大写字母' : '❌ 包含大写字母';
+                
+                document.getElementById('lowercase-check').className = /[a-z]/.test(password) ? 'valid' : '';
+                document.getElementById('lowercase-check').innerHTML = /[a-z]/.test(password) ? '✅ 包含小写字母' : '❌ 包含小写字母';
+                
+                document.getElementById('number-check').className = /[0-9]/.test(password) ? 'valid' : '';
+                document.getElementById('number-check').innerHTML = /[0-9]/.test(password) ? '✅ 包含数字' : '❌ 包含数字';
+                
+                document.getElementById('special-check').className = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password) ? 'valid' : '';
+                document.getElementById('special-check').innerHTML = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password) ? '✅ 包含特殊字符' : '❌ 包含特殊字符';
+              });
+            </script>
             
             <div class="form-group">
               <label class="form-label" for="confirmPassword">🔐 <%= __('auth.register.confirmPassword') %></label>

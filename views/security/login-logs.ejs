@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="<%= locale %>">
+<head>
+  <%- include('../partials/head') %>
+  <style>
+    .logs-container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .log-item {
+      display: flex;
+      align-items: center;
+      padding: 1rem;
+      border-bottom: 1px solid #eee;
+      transition: background 0.2s;
+    }
+    
+    .log-item:hover {
+      background: #f8f9fa;
+    }
+    
+    .log-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 1rem;
+      font-size: 1.25rem;
+    }
+    
+    .log-success {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .log-failed {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
+    .log-info {
+      flex: 1;
+    }
+    
+    .log-time {
+      color: #666;
+      font-size: 0.875rem;
+    }
+    
+    .log-ip {
+      color: #888;
+      font-size: 0.8rem;
+    }
+    
+    .empty-logs {
+      text-align: center;
+      padding: 3rem;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+  
+  <main class="main-content">
+    <div class="container">
+      <div class="logs-container">
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h1>🔐 登录日志</h1>
+            <a href="/profile" class="btn btn-secondary">返回个人资料</a>
+          </div>
+          
+          <%- include('../partials/messages') %>
+          
+          <% if (logs && logs.length > 0) { %>
+            <div class="logs-list">
+              <% logs.forEach(function(log) { %>
+                <div class="log-item">
+                  <div class="log-icon <%= log.success ? 'log-success' : 'log-failed' %>">
+                    <%= log.success ? '✓' : '✗' %>
+                  </div>
+                  <div class="log-info">
+                    <div>
+                      <strong><%= log.success ? '登录成功' : '登录失败' %></strong>
+                    </div>
+                    <div class="log-time">
+                      <%= new Date(log.timestamp).toLocaleString('zh-CN') %>
+                    </div>
+                    <% if (log.ip) { %>
+                      <div class="log-ip">
+                        IP: <%= log.ip %> | 
+                        <%= log.userAgent ? log.userAgent.substring(0, 50) + '...' : '' %>
+                      </div>
+                    <% } %>
+                  </div>
+                </div>
+              <% }); %>
+            </div>
+          <% } else { %>
+            <div class="empty-logs">
+              <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
+              <p>暂无登录记录</p>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <%- include('../partials/footer') %>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <%- include('../partials/head') %>
+  <style>
+    .twofa-container {
+      max-width: 500px;
+      margin: 2rem auto;
+    }
+    
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: #d4edda;
+      color: #155724;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+  
+  <main class="main-content">
+    <div class="container">
+      <div class="twofa-container">
+        <div class="card">
+          <h1>🔐 双重认证</h1>
+          
+          <%- include('../partials/messages') %>
+          
+          <div class="text-center my-4">
+            <div class="status-badge">
+              ✓ 已启用
+            </div>
+          </div>
+          
+          <div class="alert alert-info">
+            <strong>双重认证已启用</strong>
+            <p class="mb-0">您的账户已受到额外保护。每次登录时，除了密码，还需要输入身份验证器中的验证码。</p>
+          </div>
+          
+          <h3 class="mt-4">禁用双重认证</h3>
+          <p class="text-muted">如果您想禁用双重认证，需要输入当前密码进行确认。</p>
+          
+          <form action="/2fa/disable" method="POST">
+            <div class="form-group">
+              <label class="form-label">当前密码</label>
+              <input 
+                type="password" 
+                name="password" 
+                class="form-control" 
+                required
+              >
+            </div>
+            
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-danger">禁用双重认证</button>
+              <a href="/profile" class="btn btn-secondary">返回</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <%- include('../partials/footer') %>
+</body>
+</html>

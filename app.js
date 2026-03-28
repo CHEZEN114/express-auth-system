@@ -15,6 +15,8 @@ const { initDb } = require('./db');
 const authRoutes = require('./routes/auth');
 const oauthRoutes = require('./routes/oauth');
 const userRoutes = require('./routes/user');
+const securityRoutes = require('./routes/security');
+const twoFaRoutes = require('./routes/twofa');
 const { requireAuth, requireGuest } = require('./middleware/auth');
 const i18n = require('./config/i18n');
 
@@ -76,6 +78,8 @@ app.set('views', path.join(__dirname, 'views'));
 app.use('/', authRoutes);
 app.use('/auth', oauthRoutes);
 app.use('/', userRoutes);
+app.use('/', securityRoutes);
+app.use('/', twoFaRoutes);
 
 // 首页
 app.get('/', (req, res) => {

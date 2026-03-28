@@ -12,7 +12,9 @@ const DB_FILE = 'database.json';
 const defaultData = {
   users: [],
   passwordResetTokens: [], // 存储密码重置令牌
-  emailVerificationTokens: [] // 存储邮箱验证令牌
+  emailVerificationTokens: [], // 存储邮箱验证令牌
+  loginLogs: [], // 登录日志
+  apiTokens: [] // API Token 列表
 };
 
 // 初始化数据库

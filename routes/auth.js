@@ -22,6 +22,13 @@ const {
 } = require('../db');
 
 const { requireGuest, requireAuth } = require('../middleware/auth');
+const { 
+  checkAccountLock, 
+  recordLoginFailure, 
+  clearLoginFailure,
+  validatePasswordPolicy,
+  recordLoginLog 
+} = require('../middleware/security');
 
 // ==================== 注册 ====================
 
@@ -46,8 +53,10 @@ router.post('/register', requireGuest, async (req, res) => {
       errors.push('两次输入的密码不一致');
     }
     
-    if (password && password.length < 6) {
-      errors.push('密码长度至少为6位');
+    // 验证密码策略
+    const passwordCheck = validatePasswordPolicy(password);
+    if (!passwordCheck.valid) {
+      errors.push(...passwordCheck.errors);
     }
     
     if (username && username.length < 3) {
@@ -121,7 +130,7 @@ router.get('/login', requireGuest, (req, res) => {
 });
 
 // 处理登录
-router.post('/login', requireGuest, async (req, res) => {
+router.post('/login', requireGuest, checkAccountLock, async (req, res) => {
   try {
     const { email, password, remember } = req.body;
     
@@ -134,6 +143,8 @@ router.post('/login', requireGuest, async (req, res) => {
     // 查找用户
     const user = await findUserByEmail(email);
     if (!user) {
+      await recordLoginFailure(email);
+      await recordLoginLog(null, email, false, req);
       req.flash('error', '邮箱或密码错误');
       return res.redirect('/login');
     }
@@ -141,9 +152,24 @@ router.post('/login', requireGuest, async (req, res) => {
     // 验证密码
     const isValid = await verifyPassword(user, password);
     if (!isValid) {
-      req.flash('error', '邮箱或密码错误');
+      const record = await recordLoginFailure(email);
+      await recordLoginLog(user.id, email, false, req);
+      
+      if (record.lockedUntil) {
+        const remainingMinutes = Math.ceil((record.lockedUntil - Date.now()) / 60000);
+        req.flash('error', `登录失败次数过多，账户已锁定，请 ${remainingMinutes} 分钟后重试`);
+      } else {
+        const remainingAttempts = 5 - record.attempts;
+        req.flash('error', `邮箱或密码错误，还剩 ${remainingAttempts} 次尝试机会`);
+      }
       return res.redirect('/login');
     }
+    
+    // 清除登录失败记录
+    await clearLoginFailure(email);
+    
+    // 记录成功登录日志
+    await recordLoginLog(user.id, email, true, req);
     
     // 检查邮箱是否已验证
     if (!user.isEmailVerified) {
@@ -162,8 +188,17 @@ router.post('/login', requireGuest, async (req, res) => {
       return res.redirect('/verify-email');
     }
     
+    // 检查是否启用了 2FA
+    if (user.twoFactorEnabled && user.twoFactorSecret) {
+      req.session.pending2FAUser = {
+        id: user.id,
+        email: user.email
+      };
+      return res.redirect('/2fa/login');
+    }
+    
     // 设置 session
-    const { password: _, ...userWithoutPassword } = user;
+    const { password: _, twoFactorSecret, ...userWithoutPassword } = user;
     req.session.user = userWithoutPassword;
     
     // 记住我（延长 session 有效期）

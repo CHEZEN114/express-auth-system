@@ -19,15 +19,22 @@
     "dotenv": "^17.3.1",
     "ejs": "^5.0.1",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.3.1",
     "express-session": "^1.19.0",
+    "helmet": "^8.1.0",
     "i18n": "^0.15.3",
     "lowdb": "^7.0.1",
+    "mongoose": "^9.3.3",
     "multer": "^2.1.1",
     "nodemailer": "^8.0.4",
     "passport": "^0.7.0",
     "passport-github2": "^0.1.12",
     "passport-google-oauth20": "^2.0.0",
-    "uuid": "^13.0.0"
+    "qrcode": "^1.5.4",
+    "redis": "^5.11.0",
+    "speakeasy": "^2.0.0",
+    "uuid": "^13.0.0",
+    "winston": "^3.19.0"
   },
   "devDependencies": {
     "jest": "^30.3.0",

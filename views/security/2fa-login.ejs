@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <%- include('../partials/head') %>
+  <style>
+    .twofa-login-container {
+      max-width: 400px;
+      margin: 3rem auto;
+    }
+    
+    .twofa-icon {
+      text-align: center;
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+  
+  <main class="main-content">
+    <div class="container">
+      <div class="twofa-login-container">
+        <div class="card">
+          <div class="twofa-icon">🔐</div>
+          <h2 class="text-center">双重认证</h2>
+          <p class="text-center text-muted">
+            请输入 <%= email %> 的身份验证器中的 6 位验证码
+          </p>
+          
+          <%- include('../partials/messages') %>
+          
+          <form action="/2fa/login" method="POST">
+            <div class="form-group">
+              <label class="form-label">验证码</label>
+              <input 
+                type="text" 
+                name="token" 
+                class="form-control" 
+                placeholder="000000"
+                maxlength="6"
+                pattern="[0-9]{6}"
+                autocomplete="one-time-code"
+                autofocus
+                required
+              >
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block">验证</button>
+          </form>
+          
+          <div class="text-center mt-3">
+            <a href="/login" class="text-link">使用其他账户登录</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <%- include('../partials/footer') %>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <%- include('../partials/head') %>
+  <style>
+    .twofa-container {
+      max-width: 500px;
+      margin: 2rem auto;
+    }
+    
+    .qr-code {
+      text-align: center;
+      padding: 1.5rem;
+      background: #f8f9fa;
+      border-radius: 12px;
+      margin: 1.5rem 0;
+    }
+    
+    .qr-code img {
+      max-width: 200px;
+      border: 4px solid white;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .secret-code {
+      background: #e9ecef;
+      padding: 1rem;
+      border-radius: 8px;
+      font-family: monospace;
+      text-align: center;
+      margin: 1rem 0;
+      word-break: break-all;
+    }
+    
+    .steps {
+      margin: 1.5rem 0;
+    }
+    
+    .step {
+      display: flex;
+      align-items: flex-start;
+      margin: 1rem 0;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+    
+    .step-number {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 1rem;
+      flex-shrink: 0;
+    }
+    
+    .step-content {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+  
+  <main class="main-content">
+    <div class="container">
+      <div class="twofa-container">
+        <div class="card">
+          <h1>🔐 设置双重认证</h1>
+          <p class="text-muted">提高账户安全性，保护您的账户免受未经授权的访问</p>
+          
+          <%- include('../partials/messages') %>
+          
+          <div class="steps">
+            <div class="step">
+              <div class="step-number">1</div>
+              <div class="step-content">
+                <strong>下载身份验证器</strong>
+                <p class="mb-0 text-muted">推荐：Google Authenticator、Microsoft Authenticator 或 Authy</p>
+              </div>
+            </div>
+            
+            <div class="step">
+              <div class="step-number">2</div>
+              <div class="step-content">
+                <strong>扫描二维码</strong>
+                <div class="qr-code">
+                  <img src="<%= qrCode %>" alt="2FA QR Code">
+                </div>
+                <p class="text-center text-muted">或手动输入密钥：</p>
+                <div class="secret-code"><%= secret %></div>
+              </div>
+            </div>
+            
+            <div class="step">
+              <div class="step-number">3</div>
+              <div class="step-content">
+                <strong>验证设置</strong>
+                <p class="text-muted">输入身份验证器中的 6 位验证码：</p>
+                <form action="/2fa/verify" method="POST">
+                  <div class="form-group">
+                    <input 
+                      type="text" 
+                      name="token" 
+                      class="form-control" 
+                      placeholder="请输入 6 位验证码"
+                      maxlength="6"
+                      pattern="[0-9]{6}"
+                      required
+                    >
+                  </div>
+                  <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">启用双重认证</button>
+                    <a href="/profile" class="btn btn-secondary">取消</a>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <%- include('../partials/footer') %>
+</body>
+</html>

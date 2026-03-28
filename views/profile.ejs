@@ -161,10 +161,37 @@
               <div class="info-value"><%= new Date(user.updatedAt).toLocaleString('zh-CN') %></div>
             </div>
             
-            <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center;">
+            <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
               <button type="button" class="btn btn-primary" onclick="toggleEdit()">编辑资料</button>
+              <a href="/login-logs" class="btn btn-secondary">📋 登录日志</a>
+              <a href="/2fa/setup" class="btn btn-secondary">
+                <%= user.twoFactorEnabled ? '🔐 管理双重认证' : '🔓 启用双重认证' %>
+              </a>
               <a href="/dashboard" class="btn btn-secondary">返回用户中心</a>
             </div>
+            
+            <hr style="margin: 2rem 0;">
+            
+            <h3 style="margin-bottom: 1rem;">🔐 安全设置</h3>
+            
+            <form action="/change-password" method="POST">
+              <div class="form-group">
+                <label class="form-label">当前密码</label>
+                <input type="password" name="currentPassword" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">新密码</label>
+                <input type="password" name="newPassword" class="form-control" minlength="8" required>
+                <small class="text-muted">密码必须包含大小写字母、数字和特殊字符</small>
+              </div>
+              <div class="form-group">
+                <label class="form-label">确认新密码</label>
+                <input type="password" name="confirmPassword" class="form-control" minlength="8" required>
+              </div>
+              <div class="d-grid">
+                <button type="submit" class="btn btn-warning">修改密码</button>
+              </div>
+            </form>
           </div>
           
           <!-- 编辑模式 -->
