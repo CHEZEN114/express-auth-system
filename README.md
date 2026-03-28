@@ -21,7 +21,7 @@
 ### 1. 克隆项目
 
 ```bash
-git clone https://github.com/yourusername/express-auth-system.git
+git clone https://github.com/CHEZEN114/express-auth-system.git
 cd express-auth-system
 ```
 
