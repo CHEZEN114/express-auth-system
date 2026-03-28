@@ -1,0 +1,23 @@
+{
+  "name": "kimi-use",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "node --watch app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "connect-flash": "^0.1.1",
+    "ejs": "^5.0.1",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "lowdb": "^7.0.1",
+    "nodemailer": "^8.0.4",
+    "uuid": "^13.0.0"
+  }
+}

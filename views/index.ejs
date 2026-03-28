@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <%- include('partials/head') %>
+</head>
+<body>
+  <%- include('partials/navbar') %>
+  
+  <main class="main-content">
+    <div class="container">
+      <div class="hero">
+        <h1>安全、简单的用户认证系统</h1>
+        <p>基于 Express + LowDB 构建的完整用户认证解决方案</p>
+        
+        <% if (!user) { %>
+          <div class="hero-buttons">
+            <a href="/register" class="btn btn-secondary">立即注册</a>
+            <a href="/login" class="btn" style="background: transparent; border: 2px solid white; color: white;">登录</a>
+          </div>
+        <% } else { %>
+          <div class="hero-buttons">
+            <a href="/dashboard" class="btn btn-secondary">进入用户中心</a>
+          </div>
+        <% } %>
+      </div>
+      
+      <div class="features">
+        <div class="feature-card">
+          <div class="feature-icon">🔒</div>
+          <h3>安全加密</h3>
+          <p>使用 bcrypt 对密码进行加密存储，保障账户安全</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📧</div>
+          <h3>密码重置</h3>
+          <p>支持通过邮箱链接重置密码，流程简单安全</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3>快速部署</h3>
+          <p>纯 JavaScript 实现，无需额外数据库配置</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎨</div>
+          <h3>精美界面</h3>
+          <p>现代化的 UI 设计，支持响应式布局</p>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <%- include('partials/footer') %>
+</body>
+</html>

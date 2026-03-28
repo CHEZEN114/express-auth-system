@@ -1,0 +1,19 @@
+<nav class="navbar">
+  <div class="container">
+    <a href="/" class="navbar-brand">🔐 用户系统</a>
+    <ul class="navbar-nav">
+      <li><a href="/">首页</a></li>
+      <% if (user) { %>
+        <li><a href="/dashboard">用户中心</a></li>
+        <li><a href="/profile">个人资料</a></li>
+        <li class="user-info">
+          <span>👋 <%= user.username %></span>
+          <a href="/logout" class="btn btn-danger" style="padding: 0.5rem 1rem; font-size: 0.875rem;">登出</a>
+        </li>
+      <% } else { %>
+        <li><a href="/login">登录</a></li>
+        <li><a href="/register" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">注册</a></li>
+      <% } %>
+    </ul>
+  </div>
+</nav>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <%- include('partials/head') %>
+  <style>
+    .profile-container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .profile-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    .profile-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin: 0 auto 1rem;
+    }
+    
+    .info-group {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+    }
+    
+    .info-label {
+      font-size: 0.875rem;
+      color: #666;
+      margin-bottom: 0.25rem;
+    }
+    
+    .info-value {
+      font-size: 1rem;
+      font-weight: 500;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/navbar') %>
+  
+  <main class="main-content">
+    <div class="container">
+      <div class="profile-container">
+        <%- include('partials/messages') %>
+        
+        <div class="card">
+          <div class="profile-header">
+            <div class="profile-avatar">
+              <%= user.username.charAt(0).toUpperCase() %>
+            </div>
+            <h1><%= user.username %></h1>
+            <p style="color: #666;">个人资料</p>
+          </div>
+          
+          <div class="info-group">
+            <div class="info-label">👤 用户名</div>
+            <div class="info-value"><%= user.username %></div>
+          </div>
+          
+          <div class="info-group">
+            <div class="info-label">📧 邮箱地址</div>
+            <div class="info-value"><%= user.email %></div>
+          </div>
+          
+          <div class="info-group">
+            <div class="info-label">📅 注册时间</div>
+            <div class="info-value"><%= new Date(user.createdAt).toLocaleString('zh-CN') %></div>
+          </div>
+          
+          <div class="info-group">
+            <div class="info-label">🔄 最后更新</div>
+            <div class="info-value"><%= new Date(user.updatedAt).toLocaleString('zh-CN') %></div>
+          </div>
+          
+          <div style="margin-top: 2rem; text-align: center;">
+            <a href="/dashboard" class="btn btn-secondary">返回用户中心</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <%- include('partials/footer') %>
+</body>
+</html>

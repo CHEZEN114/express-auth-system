@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <%- include('partials/head') %>
+  <style>
+    .dashboard-card {
+      background: white;
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    
+    .welcome-section {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+    
+    .welcome-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 2rem;
+      font-weight: bold;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    
+    .stat-item {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 12px;
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #667eea;
+    }
+    
+    .stat-label {
+      color: #666;
+      margin-top: 0.5rem;
+    }
+    
+    .quick-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/navbar') %>
+  
+  <main class="main-content">
+    <div class="container">
+      <%- include('partials/messages') %>
+      
+      <!-- 欢迎区域 -->
+      <div class="dashboard-card">
+        <div class="welcome-section">
+          <div class="welcome-avatar">
+            <%= user.username.charAt(0).toUpperCase() %>
+          </div>
+          <div>
+            <h1>欢迎回来，<%= user.username %>！</h1>
+            <p style="color: #666; margin-top: 0.5rem;">
+              📧 <%= user.email %> | 🕐 注册于 <%= new Date(user.createdAt).toLocaleDateString('zh-CN') %>
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 统计信息 -->
+      <div class="dashboard-card">
+        <h2 style="margin-bottom: 1rem;">📊 账户概览</h2>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-value">✓</div>
+            <div class="stat-label">账户状态正常</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value"><%= Math.floor((Date.now() - new Date(user.createdAt)) / (1000 * 60 * 60 * 24)) %></div>
+            <div class="stat-label">注册天数</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">🔒</div>
+            <div class="stat-label">安全认证已启用</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 快捷操作 -->
+      <div class="dashboard-card">
+        <h2 style="margin-bottom: 1rem;">⚡ 快捷操作</h2>
+        <div class="quick-actions">
+          <a href="/profile" class="btn btn-primary">编辑个人资料</a>
+          <a href="/forgot-password" class="btn btn-secondary">修改密码</a>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <%- include('partials/footer') %>
+</body>
+</html>

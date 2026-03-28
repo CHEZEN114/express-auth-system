@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <%- include('../partials/head') %>
+  <style>
+    .auth-container {
+      max-width: 400px;
+      margin: 2rem auto;
+    }
+    
+    .auth-header {
+      text-align: center;
+      margin-bottom: 2rem;
+      color: white;
+    }
+    
+    .auth-header h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .auth-footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      color: white;
+    }
+    
+    .password-hint {
+      font-size: 0.875rem;
+      color: #666;
+      margin-top: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+  <%- include('../partials/navbar') %>
+  
+  <main class="main-content">
+    <div class="container">
+      <div class="auth-container">
+        <div class="auth-header">
+          <h1>🚀 创建账户</h1>
+          <p>开始您的旅程</p>
+        </div>
+        
+        <div class="card">
+          <%- include('../partials/messages') %>
+          
+          <form action="/register" method="POST">
+            <div class="form-group">
+              <label class="form-label" for="username">👤 用户名</label>
+              <input 
+                type="text" 
+                id="username" 
+                name="username" 
+                class="form-control" 
+                placeholder="请输入用户名（至少3位）"
+                minlength="3"
+                required
+              >
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="email">📧 邮箱地址</label>
+              <input 
+                type="email" 
+                id="email" 
+                name="email" 
+                class="form-control" 
+                placeholder="请输入有效邮箱"
+                required
+              >
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="password">🔑 密码</label>
+              <input 
+                type="password" 
+                id="password" 
+                name="password" 
+                class="form-control" 
+                placeholder="请输入密码（至少6位）"
+                minlength="6"
+                required
+              >
+              <p class="password-hint">密码长度至少为6位</p>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="confirmPassword">🔐 确认密码</label>
+              <input 
+                type="password" 
+                id="confirmPassword" 
+                name="confirmPassword" 
+                class="form-control" 
+                placeholder="请再次输入密码"
+                required
+              >
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block">注册</button>
+          </form>
+        </div>
+        
+        <div class="auth-footer">
+          <p>已有账户？<a href="/login" class="text-link" style="color: white; text-decoration: underline;">立即登录</a></p>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
