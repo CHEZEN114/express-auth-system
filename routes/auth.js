@@ -149,6 +149,13 @@ router.post('/login', requireGuest, checkAccountLock, async (req, res) => {
       return res.redirect('/login');
     }
     
+    // 检查账户是否被禁用
+    if (user.isActive === false) {
+      await recordLoginLog(user.id, email, false, req);
+      req.flash('error', '您的账户已被禁用，请联系管理员');
+      return res.redirect('/login');
+    }
+    
     // 验证密码
     const isValid = await verifyPassword(user, password);
     if (!isValid) {

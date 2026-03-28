@@ -55,8 +55,15 @@ async function findUserByUsername(username) {
   return data.users.find(user => user.username.toLowerCase() === username.toLowerCase());
 }
 
+// 用户角色枚举
+const UserRole = {
+  USER: 'user',
+  MODERATOR: 'moderator',
+  ADMIN: 'admin'
+};
+
 // 创建新用户
-async function createUser(username, email, password, isEmailVerified = false) {
+async function createUser(username, email, password, isEmailVerified = false, role = UserRole.USER) {
   const hashedPassword = await bcrypt.hash(password, 10);
   
   const newUser = {
@@ -65,6 +72,8 @@ async function createUser(username, email, password, isEmailVerified = false) {
     email: email.toLowerCase(),
     password: hashedPassword,
     isEmailVerified,
+    role: role, // 用户角色: admin, moderator, user
+    isActive: true, // 账户是否启用
     avatar: null,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -207,6 +216,121 @@ async function updateUserAvatar(userId, avatarUrl) {
   return user;
 }
 
+// ==================== 用户角色和状态管理 ====================
+
+// 获取所有用户（用于管理后台）
+async function getAllUsers(options = {}) {
+  const { page = 1, limit = 20, search = '', role = null, isActive = null } = options;
+  
+  let users = db.data.users;
+  
+  // 搜索过滤
+  if (search) {
+    const searchLower = search.toLowerCase();
+    users = users.filter(user => 
+      user.username.toLowerCase().includes(searchLower) ||
+      user.email.toLowerCase().includes(searchLower)
+    );
+  }
+  
+  // 角色过滤
+  if (role) {
+    users = users.filter(user => user.role === role);
+  }
+  
+  // 状态过滤
+  if (isActive !== null) {
+    users = users.filter(user => user.isActive === isActive);
+  }
+  
+  // 按创建时间倒序
+  users = users.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  
+  // 分页
+  const total = users.length;
+  const start = (page - 1) * limit;
+  const end = start + limit;
+  const paginatedUsers = users.slice(start, end).map(user => {
+    const { password, twoFactorSecret, ...userWithoutSensitive } = user;
+    return userWithoutSensitive;
+  });
+  
+  return {
+    users: paginatedUsers,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit)
+    }
+  };
+}
+
+// 更新用户角色
+async function updateUserRole(userId, newRole) {
+  const user = await findUserById(userId);
+  if (!user) return null;
+  
+  if (!Object.values(UserRole).includes(newRole)) {
+    throw new Error('无效的角色类型');
+  }
+  
+  user.role = newRole;
+  user.updatedAt = new Date().toISOString();
+  await db.write();
+  return user;
+}
+
+// 禁用/启用用户账户
+async function toggleUserStatus(userId) {
+  const user = await findUserById(userId);
+  if (!user) return null;
+  
+  user.isActive = !user.isActive;
+  user.updatedAt = new Date().toISOString();
+  await db.write();
+  return user;
+}
+
+// 删除用户
+async function deleteUser(userId) {
+  const userIndex = db.data.users.findIndex(user => user.id === userId);
+  if (userIndex === -1) return null;
+  
+  db.data.users.splice(userIndex, 1);
+  await db.write();
+  return true;
+}
+
+// 获取系统统计信息
+async function getSystemStats() {
+  const users = db.data.users;
+  const loginLogs = db.data.loginLogs || [];
+  
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  
+  return {
+    users: {
+      total: users.length,
+      active: users.filter(u => u.isActive !== false).length,
+      inactive: users.filter(u => u.isActive === false).length,
+      admins: users.filter(u => u.role === UserRole.ADMIN).length,
+      moderators: users.filter(u => u.role === UserRole.MODERATOR).length,
+      regular: users.filter(u => u.role === UserRole.USER || !u.role).length,
+      newToday: users.filter(u => new Date(u.createdAt) >= today).length,
+      newThisMonth: users.filter(u => new Date(u.createdAt) >= thisMonth).length
+    },
+    loginLogs: {
+      total: loginLogs.length,
+      today: loginLogs.filter(log => new Date(log.timestamp) >= today).length,
+      successful: loginLogs.filter(log => log.success).length,
+      failed: loginLogs.filter(log => !log.success).length
+    }
+  };
+}
+
 module.exports = {
   initDb,
   getDb,
@@ -223,5 +347,11 @@ module.exports = {
   verifyEmailVerificationToken,
   deleteEmailVerificationToken,
   markEmailAsVerified,
-  updateUserAvatar
+  updateUserAvatar,
+  UserRole,
+  getAllUsers,
+  updateUserRole,
+  toggleUserStatus,
+  deleteUser,
+  getSystemStats
 };

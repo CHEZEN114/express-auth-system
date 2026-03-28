@@ -17,7 +17,9 @@ const oauthRoutes = require('./routes/oauth');
 const userRoutes = require('./routes/user');
 const securityRoutes = require('./routes/security');
 const twoFaRoutes = require('./routes/twofa');
+const adminRoutes = require('./routes/admin');
 const { requireAuth, requireGuest } = require('./middleware/auth');
+const { checkUserActive } = require('./middleware/admin');
 const i18n = require('./config/i18n');
 
 const app = express();
@@ -68,6 +70,9 @@ app.use((req, res, next) => {
   next();
 });
 
+// 检查用户账户状态（是否被禁用）
+app.use(checkUserActive);
+
 // 模板引擎
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -80,6 +85,7 @@ app.use('/auth', oauthRoutes);
 app.use('/', userRoutes);
 app.use('/', securityRoutes);
 app.use('/', twoFaRoutes);
+app.use('/', adminRoutes);
 
 // 首页
 app.get('/', (req, res) => {

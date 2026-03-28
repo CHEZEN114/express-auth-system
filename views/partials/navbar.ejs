@@ -6,6 +6,9 @@
       <% if (user) { %>
         <li><a href="/dashboard"><%= __('nav.dashboard') %></a></li>
         <li><a href="/profile"><%= __('nav.profile') %></a></li>
+        <% if (user.role === 'admin') { %>
+          <li><a href="/admin" class="text-warning"><i class="bi bi-shield-fill"></i> 管理</a></li>
+        <% } %>
         <li class="user-info">
           <% if (user.avatar) { %>
             <img src="<%= user.avatar %>" alt="头像" class="user-avatar">
