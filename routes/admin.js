@@ -15,6 +15,7 @@ const {
   UserRole 
 } = require('../db');
 const { getUserLoginLogs } = require('../middleware/security');
+const { sendAccountStatusEmail } = require('../services/emailService');
 
 // 所有路由都需要管理员权限
 router.use(requireAdmin);
@@ -144,7 +145,11 @@ router.post('/admin/users/:id/toggle-status', async (req, res) => {
     }
     
     const status = updatedUser.isActive ? '启用' : '禁用';
-    req.flash('success', `用户账户已${status}`);
+    
+    // 异步发送账户状态变更通知邮件
+    sendAccountStatusEmail(updatedUser.email, updatedUser.username, updatedUser.isActive);
+    
+    req.flash('success', `用户账户已${status}，通知邮件已发送`);
     res.redirect('/admin/users');
   } catch (error) {
     console.error('切换用户状态错误:', error);

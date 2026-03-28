@@ -21,6 +21,8 @@ const {
   markEmailAsVerified
 } = require('../db');
 
+const { sendVerificationEmail, sendPasswordResetEmail } = require('../services/emailService');
+
 const { requireGuest, requireAuth } = require('../middleware/auth');
 const { 
   checkAccountLock, 
@@ -97,22 +99,13 @@ router.post('/register', requireGuest, async (req, res) => {
     // 构建验证链接
     const verifyUrl = `${req.protocol}://${req.get('host')}/verify-email/${verificationToken}`;
     
-    // 发送验证邮件（开发环境输出到控制台）
-    console.log('\n========== 邮箱验证邮件 ==========');
-    console.log('收件人:', email);
-    console.log('主题: 请验证您的邮箱地址');
-    console.log('内容:');
-    console.log(`您好 ${username}，`);
-    console.log('感谢您注册！请验证您的邮箱地址以激活账户。');
-    console.log('请点击以下链接验证邮箱（24小时内有效）：');
-    console.log(verifyUrl);
-    console.log('================================\n');
+    // 异步发送验证邮件
+    sendVerificationEmail(email, username, verifyUrl, 24);
     
     // 自动登录
     req.session.user = user;
     
-    req.flash('success', '注册成功！请验证您的邮箱地址（查看控制台输出）');
-    req.flash('info', `验证链接（开发模式）：${verifyUrl}`);
+    req.flash('success', '注册成功！验证邮件已发送，请查收');
     res.redirect('/verify-email');
     
   } catch (error) {
@@ -184,14 +177,10 @@ router.post('/login', requireGuest, checkAccountLock, async (req, res) => {
       const verificationToken = await createEmailVerificationToken(user.id);
       const verifyUrl = `${req.protocol}://${req.get('host')}/verify-email/${verificationToken}`;
       
-      console.log('\n========== 邮箱验证提醒 ==========');
-      console.log('收件人:', user.email);
-      console.log('主题: 请验证您的邮箱地址');
-      console.log('验证链接:', verifyUrl);
-      console.log('================================\n');
+      // 异步发送验证邮件
+      sendVerificationEmail(user.email, user.username, verifyUrl, 24);
       
-      req.flash('error', '请先验证您的邮箱地址后再登录');
-      req.flash('info', `验证链接（开发模式）：${verifyUrl}`);
+      req.flash('error', '请先验证您的邮箱地址后再登录，新的验证邮件已发送');
       return res.redirect('/verify-email');
     }
     
@@ -270,22 +259,10 @@ router.post('/forgot-password', requireGuest, async (req, res) => {
     // 构建重置链接
     const resetUrl = `${req.protocol}://${req.get('host')}/reset-password/${token}`;
     
-    // 发送邮件（实际项目中使用真实邮件服务）
-    // 这里为了演示，我们在控制台输出链接
-    console.log('\n========== 密码重置邮件 ==========');
-    console.log('收件人:', email);
-    console.log('主题: 密码重置请求');
-    console.log('内容:');
-    console.log(`您好 ${user.username}，`);
-    console.log('我们收到了您的密码重置请求。');
-    console.log('请点击以下链接重置密码（1小时内有效）：');
-    console.log(resetUrl);
-    console.log('如果您没有请求重置密码，请忽略此邮件。');
-    console.log('================================\n');
+    // 异步发送密码重置邮件
+    sendPasswordResetEmail(email, user.username, resetUrl, 1);
     
-    // 在开发环境中直接显示链接给用户
-    req.flash('success', '密码重置链接已生成（请查看控制台输出）');
-    req.flash('info', `重置链接（开发模式）：${resetUrl}`);
+    req.flash('success', '密码重置邮件已发送，请查收您的邮箱');
     res.redirect('/forgot-password');
     
   } catch (error) {
@@ -435,15 +412,10 @@ router.post('/resend-verification', requireGuest, async (req, res) => {
     const verificationToken = await createEmailVerificationToken(user.id);
     const verifyUrl = `${req.protocol}://${req.get('host')}/verify-email/${verificationToken}`;
     
-    // 发送验证邮件（开发环境输出到控制台）
-    console.log('\n========== 重新发送邮箱验证邮件 ==========');
-    console.log('收件人:', email);
-    console.log('主题: 请验证您的邮箱地址');
-    console.log('验证链接:', verifyUrl);
-    console.log('================================\n');
+    // 异步发送验证邮件
+    sendVerificationEmail(email, user.username, verifyUrl, 24);
     
-    req.flash('success', '验证邮件已重新发送（请查看控制台输出）');
-    req.flash('info', `验证链接（开发模式）：${verifyUrl}`);
+    req.flash('success', '验证邮件已重新发送，请查收您的邮箱');
     res.redirect('/verify-email');
     
   } catch (error) {
