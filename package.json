@@ -1,5 +1,5 @@
 {
-  "name": "kimi-use",
+  "name": "express-auth-system",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -9,9 +9,9 @@
     "test:watch": "jest --watch"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "author": "CHEZEN114",
+  "license": "MIT",
+  "description": "基于 Express + LowDB 的完整用户认证系统，支持注册、登录、密码重置、2FA、OAuth、管理后台等功能",
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "connect-flash": "^0.1.1",
